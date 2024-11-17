@@ -23,6 +23,7 @@ func main() {
 	client.Login(cfg.PhoneNumber)
 
 	client.On(telegram.OnMessage, func(message *telegram.NewMessage) error {
+		log.Printf("Received message from id: %d, name: %s: %s\n", message.Sender.ID, message.Sender.Username, message.Message.Message)
 		message.Reply("Hello from Gogram!")
 		return nil
 	}, telegram.FilterPrivate)
