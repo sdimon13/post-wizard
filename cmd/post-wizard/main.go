@@ -17,14 +17,15 @@ func main() {
 		LogLevel: telegram.LogInfo,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Ошибка создания клиента Telegram: %v", err)
 	}
 
 	client.Conn()
 	client.Login(cfg.PhoneNumber)
 
-	// Инициализация событий
+	// Инициализация обработчиков событий
 	events.InitEventHandlers(client, cfg)
 
+	// Запуск клиента
 	client.Idle()
 }
