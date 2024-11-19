@@ -23,35 +23,32 @@ func LoadConfig() *Config {
 		log.Println("Не удалось загрузить .env файл, используем переменные окружения из системы")
 	}
 
-	appIDStr := os.Getenv("APP_ID")
-	appHash := os.Getenv("APP_HASH")
-	phoneNumber := os.Getenv("PHONE_NUMBER")
-	channelIDsStr := os.Getenv("CHANNEL_IDS")
-	targetUserIDsStr := os.Getenv("TARGET_USER_IDS")
-
-	if appIDStr == "" || appHash == "" || phoneNumber == "" || channelIDsStr == "" || targetUserIDsStr == "" {
-		log.Fatal("Не удалось получить конфигурационные параметры из .env")
-	}
-
-	appID, err := strconv.Atoi(appIDStr)
-	if err != nil {
-		log.Fatalf("Ошибка преобразования APP_ID в число: %v", err)
-	}
-
-	// Преобразуем списки ID каналов и пользователей в массивы
-	channelIDs := parseIDs(channelIDsStr)
-	targetUserIDs := parseIDs(targetUserIDsStr)
-
 	return &Config{
-		AppID:         int32(appID),
-		AppHash:       appHash,
-		PhoneNumber:   phoneNumber,
-		ChannelIDs:    channelIDs,
-		TargetUserIDs: targetUserIDs,
+		AppID:         getEnvAsInt32("APP_ID"),
+		AppHash:       getEnv("APP_HASH"),
+		PhoneNumber:   getEnv("PHONE_NUMBER"),
+		ChannelIDs:    parseIDs(getEnv("CHANNEL_IDS")),
+		TargetUserIDs: parseIDs(getEnv("TARGET_USER_IDS")),
 	}
 }
 
-// parseIDs преобразует строку "1,2,3" в []int64
+func getEnv(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatalf("Отсутствует обязательная переменная окружения: %s", key)
+	}
+	return value
+}
+
+func getEnvAsInt32(key string) int32 {
+	valueStr := getEnv(key)
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Fatalf("Ошибка преобразования %s в число: %v", key, err)
+	}
+	return int32(value)
+}
+
 func parseIDs(idsStr string) []int64 {
 	ids := []int64{}
 	for _, id := range strings.Split(idsStr, ",") {
