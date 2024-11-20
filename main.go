@@ -36,7 +36,7 @@ func main() {
 		}
 
 		for _, channelID := range cfg.ChannelIDs {
-			if message.Channel.ID == channelID {
+			if message.Channel.ID == channelID && message.Message.GroupedID == 0 {
 				forwardMedia(client, message, cfg.TargetUserIDs)
 				break
 			}
