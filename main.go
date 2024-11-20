@@ -5,6 +5,7 @@ import (
 	"github.com/amarnathcjd/gogram/telegram"
 	"log"
 	"post-wizard/config"
+	"regexp"
 )
 
 func main() {
@@ -35,16 +36,34 @@ func main() {
 			return nil
 		}
 
-		for _, channelID := range cfg.ChannelIDs {
-			if message.Channel.ID == channelID && message.Message.GroupedID == 0 {
-				forwardMedia(client, message, cfg.TargetUserIDs)
-				break
-			}
+		// Проверяем, содержит ли сообщение ссылки или хэштеги
+		if containsLinksOrHashtags(message.Message.Message) {
+			log.Println("Сообщение содержит ссылки или хэштеги. Пересылка пропущена.")
+			return nil
 		}
+
+		if message.Message.GroupedID != 0 {
+			log.Println("Сообщение является группированным. Пересылка пропущена.")
+			return nil
+		}
+
+		forwardMedia(client, message, cfg.TargetUserIDs)
+
 		return nil
-	})
+	}, telegram.FilterChats(cfg.ChannelIDs...))
 
 	client.Idle()
+}
+
+// Функция для проверки наличия ссылок или хэштегов
+func containsLinksOrHashtags(text string) bool {
+	// Регулярное выражение для ссылок
+	linkRegex := regexp.MustCompile(`https?://[^\s]+`)
+	// Регулярное выражение для хэштегов
+	hashtagRegex := regexp.MustCompile(`#[^\s]+`)
+
+	// Проверяем, есть ли совпадения с любым из регулярных выражений
+	return linkRegex.MatchString(text) || hashtagRegex.MatchString(text)
 }
 
 func forwardText(client *telegram.Client, message *telegram.NewMessage, targetUserIDs []int64) {
