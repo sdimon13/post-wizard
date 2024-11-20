@@ -36,7 +36,6 @@ func main() {
 			return nil
 		}
 
-		// Проверяем, содержит ли сообщение ссылки или хэштеги
 		if containsLinksOrHashtags(message.Message.Message) {
 			log.Println("Сообщение содержит ссылки или хэштеги. Пересылка пропущена.")
 			return nil
